@@ -62,4 +62,8 @@ public class UserService {
         }
     }
 
+    public User findByStudentId(String studentId) {
+        return this.userRepository.findByStudentId(studentId);
+    }
+
 }

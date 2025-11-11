@@ -1,4 +1,4 @@
-package com.example.test.websocket;
+package com.example.test.socket.websocket;
 
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
