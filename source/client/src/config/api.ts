@@ -7,6 +7,7 @@ import {
   IModelPaginate,
   IGetAccount,
   IChat,
+  IProblem,
 } from "@/types/backend";
 import { message, notification } from "antd";
 import Cookies from "js-cookie";
@@ -221,4 +222,41 @@ export const logout = async (): Promise<void> => {
   }
 
   return res;
+};
+
+
+// Problem Apis
+
+export const fetchProblems = async ({
+  page = 1,
+  size = 10,
+  name = "",
+}: {
+  page?: number;
+  size?: number;
+  name?: string;
+}): Promise<IBackendRes<IModelPaginate<IProblem>> | undefined> => {
+  try {
+    let url = `${BACKEND_URL}/problems?size=${size}&page=${page}`;
+
+    if (name && name.trim() !== "") {
+      url += `&filter=title ~~ '*${name}*'`;
+    }
+
+    const res = await fetchWithInterceptor(url, {
+      method: "GET",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${localStorage.getItem("access_token")}`,
+      },
+    });
+
+    if (!res) {
+      return;
+    }
+
+    return res;
+  } catch (error: any) {
+    
+  }
 };

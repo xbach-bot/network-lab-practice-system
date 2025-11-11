@@ -59,3 +59,14 @@ export interface IUser {
   createdAt?: string;
   
 }
+
+export interface IProblem {
+  id: int;
+  title: string;
+  description: string;
+  qcode: string;
+  protocolType: string;
+  type: string;
+  ioType: string;
+  solved?: boolean;
+}
