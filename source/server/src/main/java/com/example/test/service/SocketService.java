@@ -14,4 +14,8 @@ public class SocketService {
             }
         }
     }
+
+    public void sendEventToClient(SocketIOClient client, String eventName, Object payload) {
+        client.sendEvent(eventName, payload);
+    }
 }

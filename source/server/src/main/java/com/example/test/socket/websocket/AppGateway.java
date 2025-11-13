@@ -89,4 +89,11 @@ public class AppGateway {
         server.getBroadcastOperations().sendEvent("deleteMessage", payload);
     }
 
+    public void sendEventToClient(String userEmail, String eventName, Object payload) {
+        SocketIOClient client = clients.get(userEmail);
+        if (client != null) {
+            this.socketService.sendEventToClient(client, eventName, payload);
+        }
+    }
+
 }

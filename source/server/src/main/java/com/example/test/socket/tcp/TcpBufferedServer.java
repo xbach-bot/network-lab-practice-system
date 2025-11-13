@@ -12,6 +12,7 @@ import com.example.test.config.HandlerRegistry;
 import com.example.test.domain.User;
 import com.example.test.domain.response.problem.ProblemResult;
 import com.example.test.handler.ProblemHandler;
+import com.example.test.service.SubmissionService;
 import com.example.test.service.UserService;
 
 import jakarta.annotation.PostConstruct;
@@ -21,6 +22,8 @@ public class TcpBufferedServer {
 
     @Autowired
     private HandlerRegistry handlerRegistry;
+    @Autowired
+    private SubmissionService submissionService;
 
     @Autowired
     private UserService userService;
@@ -51,7 +54,7 @@ public class TcpBufferedServer {
             BufferedReader reader = new BufferedReader(
                     new InputStreamReader(socket.getInputStream()));
 
-            String header = reader.readLine(); // "sv;qcode"
+            String header = reader.readLine();
             String[] p = header.split(";");
             student = p[0];
             qcode = p[1];
@@ -66,6 +69,7 @@ public class TcpBufferedServer {
 
             res = handler.processTcpBuffered(socket, student, qcode);
 
+            submissionService.save(student, qcode, res);
             socket.close();
 
         } catch (Exception e) {
@@ -76,6 +80,7 @@ public class TcpBufferedServer {
             res.setExpectedResult(null);
             res.setCorrect(false);
             res.setStatus("Chưa hoàn thành");
+            submissionService.save(student, qcode, res);
             e.printStackTrace();
         }
     }

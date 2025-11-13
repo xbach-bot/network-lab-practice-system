@@ -2,7 +2,6 @@ package com.example.test.socket.udp;
 
 import java.net.DatagramPacket;
 import java.net.DatagramSocket;
-import java.net.SocketTimeoutException;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -11,6 +10,7 @@ import com.example.test.config.HandlerRegistry;
 import com.example.test.domain.User;
 import com.example.test.domain.response.problem.ProblemResult;
 import com.example.test.handler.ProblemHandler;
+import com.example.test.service.SubmissionService;
 import com.example.test.service.UserService;
 
 import jakarta.annotation.PostConstruct;
@@ -24,6 +24,9 @@ public class UdpServer {
     private HandlerRegistry handlerRegistry;
 
     @Autowired
+    private SubmissionService submissionService;
+
+    @Autowired
     private UserService userService;
 
     @PostConstruct
@@ -31,7 +34,7 @@ public class UdpServer {
         new Thread(() -> {
             try (DatagramSocket socket = new DatagramSocket(PORT)) {
 
-                System.out.println("✅ UDP Server running at port " + PORT);
+                System.out.println("UDP Server running at port " + PORT);
 
                 byte[] buffer = new byte[1024];
 
@@ -55,6 +58,8 @@ public class UdpServer {
                         ProblemHandler handler = handlerRegistry.get(qcode);
 
                         res = handler.processUdp(socket, clientPacket, student, qcode);
+
+                        submissionService.save(student, qcode, res);
 
                     } catch (Exception e) {
                         e.printStackTrace();

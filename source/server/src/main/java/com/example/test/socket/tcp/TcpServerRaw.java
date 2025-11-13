@@ -11,6 +11,7 @@ import com.example.test.config.HandlerRegistry;
 import com.example.test.domain.User;
 import com.example.test.domain.response.problem.ProblemResult;
 import com.example.test.handler.ProblemHandler;
+import com.example.test.service.SubmissionService;
 import com.example.test.service.UserService;
 
 import jakarta.annotation.PostConstruct;
@@ -20,6 +21,8 @@ public class TcpServerRaw {
 
     @Autowired
     private HandlerRegistry handlerRegistry;
+    @Autowired
+    private SubmissionService submissionService;
 
     @Autowired
     private UserService userService;
@@ -68,6 +71,7 @@ public class TcpServerRaw {
 
             res = handler.processTcpRaw(socket, student, qcode);
 
+            submissionService.save(student, qcode, res);
             socket.close();
 
         } catch (Exception e) {
@@ -77,6 +81,7 @@ public class TcpServerRaw {
             res.setExpectedResult(null);
             res.setCorrect(false);
             res.setStatus("Chưa hoàn thành");
+            submissionService.save(student, qcode, res);
             e.printStackTrace();
         }
     }
