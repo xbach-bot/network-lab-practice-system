@@ -70,3 +70,17 @@ export interface IProblem {
   ioType: string;
   solved?: boolean;
 }
+
+export interface ISubmission{
+  id?: int;
+  user: IUser;
+
+  problem: IProblem
+
+  inputData: string;
+  studentResult: string;
+  expectedResult: string;
+  correct: boolean;
+  createdAt?: string;
+  status: string;
+}

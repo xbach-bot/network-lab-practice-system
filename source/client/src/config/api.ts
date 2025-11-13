@@ -8,6 +8,7 @@ import {
   IGetAccount,
   IChat,
   IProblem,
+  ISubmission,
 } from "@/types/backend";
 import { message, notification } from "antd";
 import Cookies from "js-cookie";
@@ -241,6 +242,68 @@ export const fetchProblems = async ({
 
     if (name && name.trim() !== "") {
       url += `&filter=title ~~ '*${name}*'`;
+    }
+
+    const res = await fetchWithInterceptor(url, {
+      method: "GET",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${localStorage.getItem("access_token")}`,
+      },
+    });
+
+    if (!res) {
+      return;
+    }
+
+    return res;
+  } catch (error: any) {
+    
+  }
+};
+
+export const fetchProblemByQCode = async (
+  qCode: string
+): Promise<IBackendRes<IProblem> | undefined> => {
+  try {
+    const res = await fetchWithInterceptor(
+      `${BACKEND_URL}/problems/get-one/${qCode}`,
+      {
+        method: "GET",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${localStorage.getItem("access_token")}`,
+        },
+      }
+    );
+
+    if (!res) {
+      return;
+    }
+
+    return res;
+  } catch (error: any) {
+    
+  }
+};
+
+
+// Submission Apis
+
+export const fetchSubmissions = async ({
+  page = 1,
+  size = 10,
+  qCode = "",
+}: {
+  page?: number;
+  size?: number;
+  qCode?: string;
+}): Promise<IBackendRes<IModelPaginate<ISubmission>> | undefined> => {
+  try {
+    let url = `${BACKEND_URL}/submissions?size=${size}&page=${page}`;
+
+    if (qCode && qCode.trim() !== "") {
+      url += `&filter=problem.qCode ~~ '*${qCode}*'`;
     }
 
     const res = await fetchWithInterceptor(url, {
