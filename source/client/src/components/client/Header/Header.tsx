@@ -32,7 +32,6 @@ const Header: React.FC = () => {
     const data = await logout();
 
     dispatch(setLogoutAction({}));
-    window.location.reload();
   };
 
   return (
