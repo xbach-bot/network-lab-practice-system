@@ -41,8 +41,16 @@ public class ChatController {
     @GetMapping("")
     public ResponseEntity<ResponsePaginationDTO> getChats(
             @RequestParam(value = "lastPage", required = false, defaultValue = "false") boolean lastPage,
-            @Filter Specification<Chat> spec, Pageable pageable) {
+            @Filter Specification<Chat> spec, Pageable pageable) throws BadRequestException {
         return new ResponseEntity<>(this.chatService.getChats(spec, pageable, lastPage), HttpStatus.OK);
+    }
+
+    @GetMapping("/rooms")
+    public ResponseEntity<ResponsePaginationDTO> getChatsFromRooms(
+            @RequestParam(value = "lastPage", required = false, defaultValue = "false") boolean lastPage,
+            @RequestParam(value = "roomId", required = false) Long roomId,
+            @Filter Specification<Chat> spec, Pageable pageable) throws BadRequestException {
+        return new ResponseEntity<>(this.chatService.getChatsFromRoom(spec, pageable, lastPage, roomId), HttpStatus.OK);
     }
 
     @DeleteMapping("/{id}")

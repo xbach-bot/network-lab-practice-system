@@ -11,4 +11,7 @@ import lombok.Setter;
 public class CreateChatDTO {
     @NotBlank(message = "Content must not be blank")
     private String content;
+
+    private Long roomId;
+
 }

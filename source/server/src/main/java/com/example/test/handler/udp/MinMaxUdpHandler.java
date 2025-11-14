@@ -47,7 +47,7 @@ public class MinMaxUdpHandler implements ProblemHandler {
             prevTimeout = serverSocket.getSoTimeout();
         } catch (Exception ignore) {
         }
-        final int WAIT_MS = 100;
+        final int WAIT_MS = 2000;
         serverSocket.setSoTimeout(WAIT_MS);
 
         String studentResult = null;

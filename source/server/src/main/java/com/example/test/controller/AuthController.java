@@ -16,8 +16,6 @@ import com.example.test.domain.response.ResponseLoginDTO;
 import com.example.test.service.AuthService;
 import com.example.test.service.JwtService;
 import com.example.test.service.UserService;
-
-import io.github.resilience4j.ratelimiter.annotation.RateLimiter;
 import jakarta.validation.Valid;
 import lombok.extern.slf4j.Slf4j;
 

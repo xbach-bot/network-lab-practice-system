@@ -15,6 +15,7 @@ import org.springframework.stereotype.Service;
 
 import com.example.test.core.error.BadRequestException;
 import com.example.test.domain.Chat;
+import com.example.test.domain.Room;
 import com.example.test.domain.User;
 import com.example.test.domain.request.chat.CreateChatDTO;
 import com.example.test.domain.response.ResponseMetaDTO;
@@ -27,12 +28,14 @@ import com.example.test.repository.UserRepository;
 public class ChatService {
     private final ChatRepository chatRepository;
     private final UserRepository userRepository;
-
+    private final RoomService roomService;
     private final ModelMapper modelMapper;
 
-    public ChatService(ChatRepository chatRepository, UserRepository userRepository, ModelMapper modelMapper) {
+    public ChatService(ChatRepository chatRepository, UserRepository userRepository, RoomService roomService,
+            ModelMapper modelMapper) {
         this.chatRepository = chatRepository;
         this.userRepository = userRepository;
+        this.roomService = roomService;
         this.modelMapper = modelMapper;
     }
 
@@ -43,10 +46,22 @@ public class ChatService {
 
         String email = SecurityContextHolder.getContext().getAuthentication().getName();
         User user = userRepository.findByEmail(email);
+        Room room = null;
+        if (createChatDTO.getRoomId() != null) {
 
+            room = roomService.getRoomById(createChatDTO.getRoomId());
+            if (room == null) {
+                throw new BadRequestException("Room not found");
+            }
+
+            if (room.getParticipants() != null && !room.getParticipants().contains(user)) {
+                throw new BadRequestException("You are not a participant of this room");
+            }
+        }
         Chat chat = new Chat();
         chat.setContent(createChatDTO.getContent());
         chat.setUser(user);
+        chat.setRoom(room);
 
         ResponseChatDTO responseChatDTO = modelMapper.map(chat, ResponseChatDTO.class);
         responseChatDTO.setCreatedAt(Instant.now());
@@ -57,40 +72,122 @@ public class ChatService {
         return responseChatDTO;
     }
 
-    public ResponsePaginationDTO getChats(Specification<Chat> spec, Pageable pageable, Boolean lastPage) {
+    public ResponsePaginationDTO getChats(Specification<Chat> spec, Pageable pageable, Boolean lastPage)
+            throws BadRequestException {
+        Specification<Chat> finalSpec;
 
-        Page<Chat> chat;
-        if (lastPage) {
-            // Sắp xếp theo thời gian tạo (createdAt) giảm dần
+        int pageSize = (pageable != null) ? pageable.getPageSize() : 50;
+
+        
+        finalSpec = spec.and((root, query, cb) -> cb.isNull(root.get("room")));
+
+        Page<Chat> chatPage;
+        if (Boolean.TRUE.equals(lastPage)) {
+            
             Sort sort = Sort.by(Sort.Direction.ASC, "createdAt");
-            Pageable sortedPageable = PageRequest.of(0, pageable != null ? pageable.getPageSize() : 50, sort);
+            Pageable sortedPageable = PageRequest.of(0, pageSize, sort);
 
-            // Lấy trang đầu tiên để tính tổng số trang
-            Page<Chat> firstPage = this.chatRepository.findAll(spec, sortedPageable);
+            Page<Chat> firstPage = this.chatRepository.findAll(finalSpec, sortedPageable);
             int totalPages = firstPage.getTotalPages();
 
-            // Tạo Pageable với trang cuối cùng
-            Pageable lastPageable = PageRequest.of(totalPages - 1, pageable != null ? pageable.getPageSize() : 50,
-                    sort);
-            chat = this.chatRepository.findAll(spec, lastPageable);
+            if (totalPages == 0) {
+                chatPage = Page.empty();
+            } else {
+                Pageable lastPageable = PageRequest.of(totalPages - 1, pageSize, sort);
+                chatPage = this.chatRepository.findAll(finalSpec, lastPageable);
+            }
         } else {
-            chat = this.chatRepository.findAll(spec, pageable);
+            if (pageable == null) {
+                pageable = PageRequest.of(0, pageSize);
+            }
+            chatPage = this.chatRepository.findAll(finalSpec, pageable);
         }
 
         ResponsePaginationDTO resultPaginationDTO = new ResponsePaginationDTO();
-
         ResponseMetaDTO meta = new ResponseMetaDTO();
 
-        meta.setCurrent(chat.getNumber() + 1);
-        meta.setPageSize(chat.getSize());
+        meta.setCurrent(chatPage.getNumber() + 1);
+        meta.setPageSize(chatPage.getSize());
+        meta.setPages(chatPage.getTotalPages());
+        meta.setTotal(chatPage.getTotalElements());
 
-        meta.setPages(chat.getTotalPages());
-        meta.setTotal(chat.getTotalElements());
+        List<ResponseChatDTO> chats = chatPage.getContent().stream()
+                .map(chatEntity -> modelMapper.map(chatEntity, ResponseChatDTO.class))
+                .collect(Collectors.toList());
 
-        List<ResponseChatDTO> chats = chat.getContent().stream().map(chatEntity -> {
-            ResponseChatDTO chatDTO = modelMapper.map(chatEntity, ResponseChatDTO.class);
-            return chatDTO;
-        }).collect(Collectors.toList());
+        resultPaginationDTO.setMeta(meta);
+        resultPaginationDTO.setResult(chats);
+
+        return resultPaginationDTO;
+    }
+
+    public ResponsePaginationDTO getChatsFromRoom(Specification<Chat> spec, Pageable pageable, Boolean lastPage,
+            Long roomId)
+            throws BadRequestException {
+        Specification<Chat> finalSpec;
+
+        int pageSize = (pageable != null) ? pageable.getPageSize() : 50;
+
+        if (roomId != null) {
+            
+            Room room = roomService.getRoomById(roomId);
+            if (room == null) {
+                throw new BadRequestException("Room not found");
+            }
+
+            String email = SecurityContextHolder.getContext().getAuthentication().getName();
+            System.out.println("Authenticated user email: " + email);
+            User user = userRepository.findByEmail(email);
+            if (user == null) {
+                throw new BadRequestException("User not found");
+            }
+
+            if (room.getParticipants() == null || !room.getParticipants().contains(user)) {
+                throw new BadRequestException("You are not a participant of this room");
+            }
+
+            
+            Specification<Chat> roomEqSpec = (root, query, cb) -> cb.equal(root.get("room").get("id"), roomId);
+            finalSpec = (spec != null) ? spec.and(roomEqSpec) : roomEqSpec;
+        } else {
+           
+            Specification<Chat> roomNullSpec = (root, query, cb) -> cb.isNull(root.get("room").get("id"));
+            finalSpec = (spec != null) ? spec.and(roomNullSpec) : roomNullSpec;
+        }
+
+        Page<Chat> chatPage;
+        if (Boolean.TRUE.equals(lastPage)) {
+            
+            Sort sort = Sort.by(Sort.Direction.ASC, "createdAt");
+            Pageable sortedPageable = PageRequest.of(0, pageSize, sort);
+
+            Page<Chat> firstPage = this.chatRepository.findAll(finalSpec, sortedPageable);
+            int totalPages = firstPage.getTotalPages();
+
+            if (totalPages == 0) {
+                chatPage = Page.empty();
+            } else {
+                Pageable lastPageable = PageRequest.of(totalPages - 1, pageSize, sort);
+                chatPage = this.chatRepository.findAll(finalSpec, lastPageable);
+            }
+        } else {
+            if (pageable == null) {
+                pageable = PageRequest.of(0, pageSize);
+            }
+            chatPage = this.chatRepository.findAll(finalSpec, pageable);
+        }
+
+        ResponsePaginationDTO resultPaginationDTO = new ResponsePaginationDTO();
+        ResponseMetaDTO meta = new ResponseMetaDTO();
+
+        meta.setCurrent(chatPage.getNumber() + 1);
+        meta.setPageSize(chatPage.getSize());
+        meta.setPages(chatPage.getTotalPages());
+        meta.setTotal(chatPage.getTotalElements());
+
+        List<ResponseChatDTO> chats = chatPage.getContent().stream()
+                .map(chatEntity -> modelMapper.map(chatEntity, ResponseChatDTO.class))
+                .collect(Collectors.toList());
 
         resultPaginationDTO.setMeta(meta);
         resultPaginationDTO.setResult(chats);
