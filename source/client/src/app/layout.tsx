@@ -33,6 +33,9 @@ export default function RootLayout({
                   <div>
                     <Chat />
                   </div>
+                  <div>
+                    
+                  </div>
                   {children}
                 </LayoutApp>
               </StyledComponentsRegistry>

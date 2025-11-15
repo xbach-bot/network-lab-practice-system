@@ -91,20 +91,23 @@ public class AppGateway {
 
     @OnEvent("typingPrivate")
     public void onTypingPrivate(SocketIOClient client, Object payload) {
-        String room = client.getNamespace().getName();
-        this.socketService.sendEventExceptSender(room, "typingPrivate", client, payload);
+        Map<String, Long> data = (Map<String, Long>) payload;
+        String roomName = "room_" + data.get("roomId");
+        this.socketService.sendEventExceptSender(roomName, "typingPrivate", client, payload);
     }
 
     @OnEvent("stopTypingPrivate")
     public void onStopTypingPrivate(SocketIOClient client, Object payload) {
-        String room = client.getNamespace().getName();
-        this.socketService.sendEventExceptSender(room, "stopTypingPrivate", client, payload);
+        Map<String, Long> data = (Map<String, Long>) payload;
+        String roomName = "room_" + data.get("roomId");
+        this.socketService.sendEventExceptSender(roomName, "stopTypingPrivate", client, payload);
     }
 
     @OnEvent("messagePrivate")
     public void onMessagePrivate(SocketIOClient client, Object payload) {
-        String room = client.getNamespace().getName();
-        this.socketService.sendEventExceptSender(room, "messagePrivate", client, payload);
+        Map<String, Long> data = (Map<String, Long>) payload;
+        String roomName = "room_" + data.get("roomId");
+        this.socketService.sendEventExceptSender(roomName, "messagePrivate", client, payload);
     }
 
     public void sendEventToClient(String userEmail, String eventName, Object payload) {

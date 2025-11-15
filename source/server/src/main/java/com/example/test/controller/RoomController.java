@@ -14,6 +14,7 @@ import com.example.test.core.error.BadRequestException;
 import com.example.test.domain.Room;
 import com.example.test.domain.User;
 import com.example.test.domain.request.room.PrivateRoomDTO;
+import com.example.test.domain.response.room.ResponseRoomDTO;
 import com.example.test.repository.UserRepository;
 import com.example.test.service.RoomService;
 
@@ -30,8 +31,8 @@ public class RoomController {
     }
 
     @GetMapping("/me")
-    public ResponseEntity<List<Room>> getMyRooms() {
-        List<Room> rooms = this.roomService.getMyRooms();
+    public ResponseEntity<List<ResponseRoomDTO>> getMyRooms() {
+        List<ResponseRoomDTO> rooms = this.roomService.getMyRooms();
         return new ResponseEntity<>(rooms, HttpStatus.OK);
     }
 

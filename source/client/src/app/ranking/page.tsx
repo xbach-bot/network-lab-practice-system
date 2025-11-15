@@ -25,9 +25,10 @@ import { CrownOutlined } from "@ant-design/icons";
 import { CloseOutlined } from "@ant-design/icons";
 import type { ColumnsType } from "antd/es/table";
 import type { IUserRank } from "@/types/backend";
-import { useAppSelector } from "@/lib/redux/hooks";
+import { useAppDispatch, useAppSelector } from "@/lib/redux/hooks";
 import { useRouter } from "next/navigation";
 import ChatPrivate from "@/components/client/Chat/Chat.private";
+import { setChatTarget, setChatVisible } from "@/lib/redux/slice/chat.slice";
 
 const { Title } = Typography;
 
@@ -38,13 +39,15 @@ export default function Page() {
   const [page, setPage] = useState(1);
   const [pageSize, setPageSize] = useState(10);
   const [total, setTotal] = useState(0);
-  const [chatVisible, setChatVisible] = useState(false);
-  const [chatTarget, setChatTarget] = useState<any | null>(null);
-  const [loadingRoom, setLoadingRoom] = useState(false);
 
   const user = useAppSelector((state) => state.auth.user);
 
   const isLoadingAuth = useAppSelector((state) => state.auth.isLoading);
+
+  const chatVisible = useAppSelector((state) => state.chat.chatVisible);
+  const chatTarget = useAppSelector((state) => state.chat.chatTarget);
+
+  const dispatch = useAppDispatch();
 
   const navigate = useRouter();
 
@@ -91,9 +94,8 @@ export default function Page() {
   };
 
   const handleOpenChat = async (targetUser: any) => {
-    setChatTarget(targetUser);
-    setLoadingRoom(true);
-    setChatVisible(true);
+    dispatch(setChatTarget(targetUser));
+    dispatch(setChatVisible(true));
   };
 
   const columns: ColumnsType<IUserRank> = [
@@ -205,7 +207,6 @@ export default function Page() {
           </Row>
         </div>
 
-        {/* Table */}
         <Card title="Danh sách xếp hạng">
           <Table<IUserRank>
             columns={columns}
@@ -229,9 +230,7 @@ export default function Page() {
         
         {chatVisible && (
           <ChatPrivate
-            chatTarget={chatTarget}
-            loadingRoom={loadingRoom}
-            setChatVisible={setChatVisible}
+            chatTarget={chatTarget as any}
           />
         )}
       </Spin>

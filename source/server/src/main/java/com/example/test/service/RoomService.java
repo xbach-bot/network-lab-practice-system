@@ -1,11 +1,13 @@
 package com.example.test.service;
 
+import org.modelmapper.ModelMapper;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
 import com.example.test.domain.Room;
 import com.example.test.repository.RoomRepository;
 import com.example.test.domain.User;
+import com.example.test.domain.response.room.ResponseRoomDTO;
 import com.example.test.repository.UserRepository;
 import com.example.test.core.error.BadRequestException;
 import java.util.ArrayList;
@@ -19,10 +21,12 @@ public class RoomService {
     private final RoomRepository roomRepository;
 
     private final UserRepository userRepository;
+    private final ModelMapper modelMapper;
 
-    public RoomService(RoomRepository roomRepository, UserRepository userRepository) {
+    public RoomService(RoomRepository roomRepository, UserRepository userRepository, ModelMapper modelMapper) {
         this.roomRepository = roomRepository;
         this.userRepository = userRepository;
+        this.modelMapper = modelMapper;
     }
 
     public Room getRoomById(Long roomId) {
@@ -33,11 +37,19 @@ public class RoomService {
         return roomRepository.save(room);
     }
 
-    public List<Room> getMyRooms() {
+    public List<ResponseRoomDTO> getMyRooms() {
         String email = SecurityContextHolder.getContext().getAuthentication().getName();
         User user = userRepository.findByEmail(email);
 
-        return user.getRooms();
+        List<Room> rooms = user.getRooms();
+
+        List<ResponseRoomDTO> roomDTOs = new ArrayList<>();
+
+        for (Room room : rooms) {
+            ResponseRoomDTO roomDTO = modelMapper.map(room, ResponseRoomDTO.class);
+            roomDTOs.add(roomDTO);
+        }
+        return roomDTOs;
     }
 
     @Transactional

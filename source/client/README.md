@@ -17,9 +17,9 @@ Client chịu trách nhiệm:
 
 | Thành phần | Công nghệ |
 |------------|-----------|
-| Ngôn ngữ | Node.js / Python / Java / ... |
-| Thư viện chính | Axios / Requests / ... |
-| Giao thức | HTTP / WebSocket / ... |
+| Ngôn ngữ | Node.js / Javascript / Typescript |
+| Thư viện chính | Next.js / React / Ant Design / Redux Toolkit / Socket.IO Client |
+| Giao thức | HTTP / WebSocket (qua socket.io) |
 
 ---
 
@@ -27,24 +27,18 @@ Client chịu trách nhiệm:
 
 ### Cài đặt
 ```bash
-# Ví dụ với Node.js
 npm install
-
-# Hoặc với Python
-pip install -r requirements.txt
 ```
 
 ### Chạy chương trình
 ```bash
-# Ví dụ
-node main.js
-# hoặc
-python client.py
+npm run dev
 ```
 
 ### Cấu hình (nếu cần)
-- Server URL: `http://localhost:8080`
-- Có thể thay đổi trong file `config.js` hoặc `.env`
+- Server URL: `http://localhost:8888`
+- Server Socket URL: `http://localhost:8889`
+- Có thể thay đổi trong file `.env.development`
 
 ---
 

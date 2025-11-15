@@ -11,22 +11,21 @@ import {
   fetchChatsFromRoom,
   fetchMyRooms,
 } from "@/config/api";
-import { useAppSelector } from "@/lib/redux/hooks";
+import { useAppDispatch, useAppSelector } from "@/lib/redux/hooks";
 import socket from "@/utils/socket";
+import { setChatVisible } from "@/lib/redux/slice/chat.slice";
 
 interface IProps {
   chatTarget: IUser;
-  loadingRoom: boolean;
-  setChatVisible: (visible: boolean) => void;
 }
 
 const ChatPrivate = (props: IProps) => {
-  const { chatTarget, loadingRoom, setChatVisible } = props;
-
+  const { chatTarget } = props;
   const [messageInput, setMessageInput] = useState("");
   const [current, setCurrent] = useState<number>(0);
   const [messages, setMessages] = useState<IChat[]>([]);
-
+  console.log(chatTarget.id);
+  
   const [isInitData, setIsInitData] = useState<boolean>(false);
 
   const [isFetching, setIsFetching] = useState<boolean>(false);
@@ -43,6 +42,8 @@ const ChatPrivate = (props: IProps) => {
   const typingTimeoutRef = useRef<any>(null);
   const [isTypingLocal, setIsTypingLocal] = useState(false);
   const [remoteTypingName, setRemoteTypingName] = useState<string | null>(null);
+
+  const dispatch = useAppDispatch();
 
   useEffect(() => {
     const onTyping = (payload: any) => {
@@ -85,6 +86,8 @@ const ChatPrivate = (props: IProps) => {
         setIsSend(!isSend);
 
         setMessages((prev) => [...prev, payload]);
+
+
       } catch (e) {
         console.error(e);
       }
@@ -305,7 +308,7 @@ const ChatPrivate = (props: IProps) => {
         <Button
           type="text"
           icon={<CloseOutlined />}
-          onClick={() => setChatVisible(false)}
+          onClick={() => dispatch(setChatVisible(false))}
         />
       </div>
 

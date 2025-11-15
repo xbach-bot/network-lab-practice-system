@@ -12,7 +12,6 @@ import com.example.test.domain.Room;
 public class SocketService {
 
     private final RoomService roomService;
-
     public SocketService(RoomService roomService) {
         this.roomService = roomService;
     }

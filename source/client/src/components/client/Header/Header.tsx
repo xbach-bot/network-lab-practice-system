@@ -5,6 +5,7 @@ import styles from "../../../styles/Header.module.scss";
 import Link from "next/link";
 import { useAppDispatch, useAppSelector } from "@/lib/redux/hooks";
 import { Avatar, Dropdown, Skeleton, Space, notification } from "antd";
+import RoomsDrawer from "@/components/client/Chat/RoomsDrawer";
 
 import { setLogoutAction } from "@/lib/redux/slice/auth.slice";
 import { logout } from "@/config/api";
@@ -50,6 +51,7 @@ const Header: React.FC = () => {
           <div className={cx("header-right")}>
             {isAuth ? (
               <div className={cx("right-items")}>
+                <RoomsDrawer />
                 <Dropdown
                   menu={{
                     items: [{ label: "Đăng xuất", key: "logout" }],
@@ -61,6 +63,7 @@ const Header: React.FC = () => {
                   }}
                 >
                   <Space style={{ cursor: "pointer" }}>
+                    
                     <span>Xin chào {user?.name}</span>
                     <Avatar>
                       {" "}
