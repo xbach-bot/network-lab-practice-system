@@ -149,17 +149,18 @@ export default function Page() {
     };
   }, [socket]);
 
+
   useEffect(() => {
-    if (!user && !loading) {
+    if (!qcode) return;
+    if(loading) return;
+
+    if(!user) {
       router.push("/login");
       return;
     }
-  }, [loading]);
-  useEffect(() => {
-    if (!qcode) return;
     loadProblem(qcode);
     loadSubmissions(qcode, 1, pageSize);
-  }, [qcode, loadProblem]);
+  }, [qcode, loadProblem, loading, user]);
 
   const columns: ColumnsType<SubmissionRow> = [
     { title: "ID", dataIndex: "id", key: "id", width: 70 },

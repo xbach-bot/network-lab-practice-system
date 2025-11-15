@@ -58,7 +58,7 @@ const Login: React.FC = () => {
       setLoading(false);
       message.success("Đăng nhập tài khoản thành công!");
       navigate.push("/");
-      window.location.reload();
+      
     } else {
       setLoading(false);
     }

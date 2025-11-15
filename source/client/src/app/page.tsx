@@ -205,7 +205,7 @@ export default function Home() {
               pagination={pagination}
               onChange={handleTableChange}
               rowKey={(record) => record.id}
-              bordered
+              
               rowClassName={(record) => (record?.solved ? "solved-row" : "")}
             />
           </Spin>

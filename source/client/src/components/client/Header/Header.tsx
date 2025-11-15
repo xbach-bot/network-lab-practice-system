@@ -42,10 +42,10 @@ const Header: React.FC = () => {
         </Link>
         <div className={cx("header-left")}>
           <div className={cx("header-item")}>
-            <Link href="/jobs">Bài Tập</Link>
+            <Link href="/submissions">Log hệ thống</Link>
           </div>
           <div className={cx("header-item")}>
-            <Link href="/companies">Log hệ thống</Link>
+            <Link href="/ranking">Bảng xếp hạng</Link>
           </div>
         </div>
 

@@ -1,0 +1,15 @@
+.wrapper {
+  /* Global override hover cho bảng chỉ trong phần Home */
+  :global(.ant-table-tbody > tr:hover > td) {
+    background: none;
+  }
+
+  :global(.solved-row > td) {
+    background: #5eba07 !important;
+    
+  }
+
+  :global(.solved-row:hover > td) {
+    background: #5eba07 !important;
+  }
+}

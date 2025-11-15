@@ -41,6 +41,8 @@ public class AppGateway {
             String usrEmail = jwt.getClaim("sub");
             if (usrEmail != null) {
                 clients.put(usrEmail, client);
+
+                socketService.userJoinRoom(client, usrEmail);
                 log.info("Client connected: " + usrEmail);
             } else {
                 client.disconnect();
@@ -74,19 +76,35 @@ public class AppGateway {
 
     @OnEvent("typing")
     public void onTyping(SocketIOClient client, Object payload) {
-        String room = client.getNamespace().getName();
-        this.socketService.sendEventExceptSender(room, "typing", client, payload);
+        this.socketService.sendEventExceptSender("public", "typing", client, payload);
     }
 
     @OnEvent("stopTyping")
     public void onStopTyping(SocketIOClient client, Object payload) {
-        String room = client.getNamespace().getName();
-        this.socketService.sendEventExceptSender(room, "stopTyping", client, payload);
+        this.socketService.sendEventExceptSender("public", "stopTyping", client, payload);
     }
 
     @OnEvent("deleteMessage")
     public void onDeleteMessage(SocketIOClient client, Object payload) {
         server.getBroadcastOperations().sendEvent("deleteMessage", payload);
+    }
+
+    @OnEvent("typingPrivate")
+    public void onTypingPrivate(SocketIOClient client, Object payload) {
+        String room = client.getNamespace().getName();
+        this.socketService.sendEventExceptSender(room, "typingPrivate", client, payload);
+    }
+
+    @OnEvent("stopTypingPrivate")
+    public void onStopTypingPrivate(SocketIOClient client, Object payload) {
+        String room = client.getNamespace().getName();
+        this.socketService.sendEventExceptSender(room, "stopTypingPrivate", client, payload);
+    }
+
+    @OnEvent("messagePrivate")
+    public void onMessagePrivate(SocketIOClient client, Object payload) {
+        String room = client.getNamespace().getName();
+        this.socketService.sendEventExceptSender(room, "messagePrivate", client, payload);
     }
 
     public void sendEventToClient(String userEmail, String eventName, Object payload) {

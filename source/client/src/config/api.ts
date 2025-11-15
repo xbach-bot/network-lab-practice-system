@@ -7,11 +7,14 @@ import {
   IModelPaginate,
   IGetAccount,
   IChat,
-  IProblem,
+  IUserRank,
   ISubmission,
+  ISubmissionFile,
+  IRenponseString,
 } from "@/types/backend";
 import { message, notification } from "antd";
 import Cookies from "js-cookie";
+import { IProblem } from "../types/backend";
 
 const BACKEND_URL = process.env.NEXT_PUBLIC_API_URL;
 const NO_RETRY_HEADER = "No-Retry";
@@ -84,7 +87,7 @@ const fetchWithInterceptor = async (
   return response.json();
 };
 
-
+//Api Chats
 export const fetchChats = async ({
   page,
   size = 50,
@@ -106,6 +109,32 @@ export const fetchChats = async ({
     }
   );
   return await res.json();
+};
+
+export const fetchChatsFromRoom = async ({
+  page,
+  size = 50,
+  lastPage,
+  roomId,
+}: {
+  page?: number;
+  size?: number;
+  lastPage?: boolean;
+  roomId?: number;
+}): Promise<IBackendRes<IModelPaginate<IChat>>> => {
+  const res = await fetchWithInterceptor(
+    `${BACKEND_URL}/chats/rooms?size=${size}${page ? `&page=${page}` : ""}${
+      lastPage ? `&lastPage=${lastPage}` : ""
+    }${roomId ? `&roomId=${roomId}` : ""}`,
+    {
+      method: "GET",
+      headers: {
+        "Content-Type": "application/json",
+        "Authorization": `Bearer ${localStorage.getItem("access_token")}`,
+      },
+    }
+  );
+  return res;
 };
 
 export const createChat = async (body: IChat): Promise<IBackendRes<IChat>> => {
@@ -323,3 +352,95 @@ export const fetchSubmissions = async ({
     
   }
 };
+
+export const fetchUserRanking = async ({
+  page = 1,
+  size = 10,
+}: {
+  page?: number;
+  size?: number;
+}): Promise<IBackendRes<IModelPaginate<IUserRank>> | undefined> => {
+  try {
+    let url = `${BACKEND_URL}/submissions/user/ranking?size=${size}&page=${page}`;
+    const res = await fetchWithInterceptor(url, {
+      method: "GET",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${localStorage.getItem("access_token")}`,
+      },
+    });
+    
+    return res;
+  } catch (error: any) {
+    console.error(error);
+  }
+};
+
+// Rooms APIs
+export const fetchMyRooms = async (): Promise<IBackendRes<any> | undefined> => {
+  try {
+    const res = await fetchWithInterceptor(`${BACKEND_URL}/rooms/me`, {
+      method: "GET",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${localStorage.getItem("access_token")}`,
+      },
+    });
+
+    return res;
+  } catch (error: any) {
+    console.error(error);
+  }
+};
+
+export const createPrivateRoom = async (targetUserId: number): Promise<IBackendRes<any>> => {
+  const res = await fetchWithInterceptor(`${BACKEND_URL}/rooms/private`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${localStorage.getItem("access_token")}`,
+    },
+    body: JSON.stringify({ targetUserId }),
+  });
+
+  return res;
+};
+
+
+// Submission File Apis
+
+export const uploadFile = async (file: File, qCode: String): Promise<IBackendRes<any>> => {
+  const formData = new FormData();
+  formData.append("file", file);
+  const res = await fetchWithInterceptor(`${BACKEND_URL}/submit-file/problems/${qCode}/upload`, {
+    method: "POST",
+    headers: {
+
+      Authorization: `Bearer ${localStorage.getItem("access_token")}`,
+    },
+    body: formData,
+  });
+  return res;
+}
+
+export const fetchSubmissionFile = async (): Promise<IBackendRes<IModelPaginate<ISubmissionFile>>> => {
+  const res = await fetchWithInterceptor(`${BACKEND_URL}/submit-file/me`, {
+    method: "GET",
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${localStorage.getItem("access_token")}`,
+    },
+  });
+  return res;
+}
+
+export const fetchContentOfSubmissionFile = async (id: number): Promise<IBackendRes<IRenponseString>> => {
+  const res = await fetchWithInterceptor(`${BACKEND_URL}/submit-file/submissions/${id}/content`, {
+    method: "GET",
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${localStorage.getItem("access_token")}`,
+    },
+  });
+  return res;
+}

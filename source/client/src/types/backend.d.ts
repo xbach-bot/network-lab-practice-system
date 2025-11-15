@@ -54,11 +54,10 @@ export interface IUser {
   name: string;
   email: string;
   studentId?: string;
-  password?: string;
   role?: string;
   createdAt?: string;
-  
 }
+
 
 export interface IProblem {
   id: int;
@@ -71,6 +70,9 @@ export interface IProblem {
   solved?: boolean;
 }
 
+export interface IRenponseString {
+  message: string;
+}
 export interface ISubmission{
   id?: int;
   user: IUser;
@@ -83,4 +85,17 @@ export interface ISubmission{
   correct: boolean;
   createdAt?: string;
   status: string;
+}
+
+export interface IUserRank{
+  user: IUser;
+  totalSubmissions: number;
+  correctSubmissions: number;
+}
+
+export interface ISubmissionFile {
+  id?: int;
+  filePath: string;
+  problem: IProblem;
+  createdAt: string;
 }
