@@ -2,7 +2,11 @@
 
 import React, { useCallback, useEffect, useState } from "react";
 import { useParams, useRouter } from "next/navigation";
-import { fetchProblemByQCode, fetchSubmissions } from "@/config/api";
+import {
+  fetchProblemByQCode,
+  fetchSubmissions,
+  uploadFile,
+} from "@/config/api";
 import {
   Card,
   Typography,
@@ -13,6 +17,7 @@ import {
   Button,
   notification,
   Pagination,
+  Upload,
 } from "antd";
 import type { ColumnsType } from "antd/es/table";
 import { IProblem, IModelPaginate, ISubmission } from "@/types/backend";
@@ -21,6 +26,7 @@ import styles from "@/styles/Problem.module.scss";
 import classNames from "classnames/bind";
 import socket from "@/utils/socket";
 import dayjs from "dayjs";
+import { UploadOutlined } from "@ant-design/icons";
 
 const cx = classNames.bind(styles);
 
@@ -74,6 +80,21 @@ export default function Page() {
       setLoadingProblem(false);
     }
   }, []);
+
+  const handleUpload = async (options: any) => {
+    const { file, onSuccess, onError, onProgress } = options;
+
+    try {
+      const res = await uploadFile(file, qcode as string);
+      if (res.status === 200) {
+        onSuccess("Ok");
+        notification.success({ message: "Nộp bài thành công!" });
+      } else {
+        onError("Error");
+        notification.error({ message: "Nộp bài thất bại!" });
+      }
+    } catch (err) {}
+  };
 
   const loadSubmissions = useCallback(async (q?: string, p = 1, size = 20) => {
     if (!q) return;
@@ -143,24 +164,23 @@ export default function Page() {
       });
     }
 
-    
+    // Cleanup khi component unmount
     return () => {
       if (socket) socket.off("submission_updated");
     };
   }, [socket]);
 
-
   useEffect(() => {
-    if (!qcode) return;
-    if(loading) return;
-
-    if(!user) {
+    if (!user && !loading) {
       router.push("/login");
       return;
     }
+  }, [loading]);
+  useEffect(() => {
+    if (!qcode) return;
     loadProblem(qcode);
     loadSubmissions(qcode, 1, pageSize);
-  }, [qcode, loadProblem, loading, user]);
+  }, [qcode, loadProblem]);
 
   const columns: ColumnsType<SubmissionRow> = [
     { title: "ID", dataIndex: "id", key: "id", width: 70 },
@@ -263,9 +283,17 @@ export default function Page() {
           </Space>
         </Card>
       </Spin>
-
+      <Upload
+        accept=".java"
+        customRequest={handleUpload}
+        showUploadList={false}
+      >
+        <Button icon={<UploadOutlined />} type="primary">
+          Nộp file code (.java)
+        </Button>
+      </Upload>
       <div style={{ marginTop: 16 }}>
-        <Card title={`Các bài nộp cho đề ${qcode ?? ""}`}>
+        <Card title={`Log hệ thống cho bài ${qcode ?? ""}`}>
           <Spin spinning={loadingSubmissions}>
             <Table
               columns={columns}

@@ -11,19 +11,11 @@ import { logout } from "@/config/api";
 import { IMeta } from "@/types/backend";
 const cx = classnames.bind(styles);
 
-interface IMessageFromServer {
-  message: string;
-  companyName: string;
-  jobId: string;
-}
-
 const Header: React.FC = () => {
   const isAuth = useAppSelector((state) => state?.auth.isAuthenticated);
   const user = useAppSelector((state) => state?.auth.user);
   const [open, setOpen] = useState<boolean>(false);
   const loading = useAppSelector((state) => state?.auth.isLoading);
-  const userRole = user?.role;
-  const notiRef = useRef<HTMLDivElement>(null);
   const [api, contextHolder] = notification.useNotification();
   const [meta, setMeta] = useState<IMeta>();
 
@@ -46,6 +38,9 @@ const Header: React.FC = () => {
           </div>
           <div className={cx("header-item")}>
             <Link href="/ranking">Bảng xếp hạng</Link>
+          </div>
+          <div className={cx("header-item")}>
+            <Link href="/submission-file">File code đã nộp</Link>
           </div>
         </div>
 

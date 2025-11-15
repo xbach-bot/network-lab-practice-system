@@ -10,7 +10,7 @@ import LayoutApp from "@/components/layout/LayoutApp";
 import Chat from "@/components/client/Chat/Chat.modal";
 
 export const metadata: Metadata = {
-  title: "Website tuyển dụng - PTIT",
+  title: "Website làm bài lập trình mạng - PTIT",
 };
 
 export default function RootLayout({
