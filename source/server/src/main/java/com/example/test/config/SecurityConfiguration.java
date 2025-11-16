@@ -51,6 +51,7 @@ public class SecurityConfiguration {
             "/auth/logout",
             "/auth/refresh",
             "/chats/**",
+            "/health",
     };
 
     @Bean
