@@ -1,7 +1,7 @@
 "use client";
 
-import React, { useCallback, useEffect, useState } from "react";
-import { useParams, useRouter } from "next/navigation";
+import React, { useCallback, useEffect, useState, Suspense } from "react";
+import { useRouter, useSearchParams } from "next/navigation";
 import {
   fetchProblemByQCode,
   fetchSubmissions,
@@ -43,9 +43,9 @@ type SubmissionRow = {
   user: { id: number; name: string; studentId?: string; email?: string };
 };
 
-export default function Page() {
-  const params = useParams();
-  const qcode = (params as any)?.qcode as string | undefined;
+function ProblemContent() {
+  const searchParams = useSearchParams();
+  const qcode = searchParams.get("qcode") || undefined;
 
   const [problem, setProblem] = useState<IProblem | null>(null);
   const [loadingProblem, setLoadingProblem] = useState(false);
@@ -321,5 +321,13 @@ export default function Page() {
         </Card>
       </div>
     </div>
+  );
+}
+
+export default function Page() {
+  return (
+    <Suspense fallback={<Spin size="large" style={{ display: "block", margin: "100px auto" }} />}>
+      <ProblemContent />
+    </Suspense>
   );
 }

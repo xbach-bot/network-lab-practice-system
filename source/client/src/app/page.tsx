@@ -150,8 +150,8 @@ export default function Home() {
                 notification.warning({ message: "Không có qCode cho bài này" });
                 return;
               }
-              // navigate to /problems/{qcode}
-              router.push(`/problems/${record.qcode}`);
+              // navigate to /problems?qcode={qcode}
+              router.push(`/problems?qcode=${record.qcode}`);
             }}
           >
             Làm bài
