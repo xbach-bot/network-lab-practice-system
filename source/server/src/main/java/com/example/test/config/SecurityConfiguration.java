@@ -52,6 +52,7 @@ public class SecurityConfiguration {
             "/auth/refresh",
             "/chats/**",
             "/health",
+            "/ping",
     };
 
     @Bean

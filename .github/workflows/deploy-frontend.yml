@@ -1,0 +1,45 @@
+name: Deploy Next.js Frontend to GitHub Pages
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - 'source/client/**'
+      - '.github/workflows/deploy-frontend.yml'
+
+permissions:
+  contents: write
+
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 18
+          cache: npm
+          cache-dependency-path: source/client/package-lock.json
+
+      - name: Install Dependencies
+        run: npm ci
+        working-directory: source/client
+
+      - name: Build Next.js Static Export
+        run: npm run build
+        working-directory: source/client
+        env:
+          # Replace with your repository name (e.g., /network-lab-practice-system)
+          NEXT_PUBLIC_BASE_PATH: /network-lab-practice-system
+          # Replace with your backend URL on Render (e.g., https://your-app.onrender.com)
+          NEXT_PUBLIC_API_URL: ${{ secrets.NEXT_PUBLIC_API_URL }}
+
+      - name: Deploy to GitHub Pages
+        uses: peaceiris/actions-gh-pages@v4
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_dir: source/client/out

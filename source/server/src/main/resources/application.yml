@@ -2,9 +2,9 @@ spring:
   application:
     name: demo
   datasource:
-    url: jdbc:mysql://localhost:3306/ltm?allowPublicKeyRetrieval=true&useSSL=false
-    username: root
-    password: Ta0936896668
+    url: ${SPRING_DATASOURCE_URL:jdbc:mysql://localhost:3306/ltm?allowPublicKeyRetrieval=true&useSSL=false}
+    username: ${SPRING_DATASOURCE_USERNAME:root}
+    password: ${SPRING_DATASOURCE_PASSWORD:Ta0936896668}
     driver-class-name: com.mysql.cj.jdbc.Driver
     hikari:
       allow-pool-suspension: true
@@ -20,7 +20,7 @@ spring:
       pageable:
         one-indexed-parameters: true
 server:
-  port: 8888
+  port: ${PORT:8888}
   tomcat:
     threads:
       max: 200
